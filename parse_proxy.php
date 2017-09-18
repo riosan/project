@@ -2,9 +2,10 @@
 
 
 
+
 trait Log {
 
-     private $logFileName;
+    private $logFileName;
 
     private function writeLog($message)
     {
@@ -53,7 +54,7 @@ class Parse {
         $response = curl_exec ($ch);
         if($response === false)
         {
-           $this->writeLog(curl_errno($ch).' '.curl_error($ch));
+            $this->writeLog(curl_errno($ch).' '.curl_error($ch));
         }
         curl_close($ch);
         return $response;
@@ -61,12 +62,12 @@ class Parse {
 
     private function parseInfo($response)
     {
-         $array = explode(PHP_EOL,$response);
+        $array = explode(PHP_EOL,$response);
 
         foreach ( $array as $key => $ip)
         {
             if(!preg_match($this->pattern,$ip)){
-                 unset($array[$key]);
+                unset($array[$key]);
             }
         }
 
@@ -79,40 +80,37 @@ class Parse {
         if(file_exists($this->filename))
         {
 
-          $handle =  fopen($this->filename,"r");
+            $handle =  fopen($this->filename,"r");
 
-          $contents = fread($handle, filesize($this->filename));
+            $contents = fread($handle, filesize($this->filename));
 
-          $old_record = $this->parseInfo($contents);
+            $old_record = $this->parseInfo($contents);
 
-          $difference =  $this->match($new_records,$old_record);
+            $difference =  $this->match($new_records,$old_record);
 
-          if(count($difference) > 0)
-          {
-              fclose($handle);
+            fclose($handle);
 
-              $handle =  fopen($this->filename,"a+");
-
-              foreach ($difference as $records)
-              {
-                  fwrite($handle,$records.PHP_EOL);
-              }
-
-          }
-
+            if(count($difference) > 0)
+            {
+                $this->fileWrite($difference,"a+");
+            }
 
         } else {
 
-            $handle =  fopen($this->filename,"w+");
+                $this->fileWrite($new_records,"w+");
+        }
 
-            foreach ($new_records as $string)
-            {
-                fwrite($handle,$string.PHP_EOL);
-            }
+    }
 
+    private function fileWrite($records,$mode)
+    {
+        $handle =  fopen($this->filename,$mode);
+
+        foreach ($records as $record)
+        {
+            fwrite($handle,$record.PHP_EOL);
         }
         fclose($handle);
-
     }
 
     private function match($new_records,$old_record)
@@ -124,7 +122,7 @@ class Parse {
 
 $gates = ['https://api.good-proxies.ru/get.php?type%5Bsocks4%5D=on&type%5Bsocks5%5D=on&count=0&ping=5000&time=600&key=333dc88edb0481e924b8b41deb945b3e',
           'https://api.good-proxies.ru/get.php?type%5Bhttp%5D=on&count=0&ping=5000&time=600&key=333dc88edb0481e924b8b41deb945b3e'
-        ];
+];
 
 
 $parse = new Parse($gates);
